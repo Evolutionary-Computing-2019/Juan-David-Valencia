@@ -68,7 +68,7 @@ class HAEA:
                     off.fitness = self.f.calculate(off.genome)
 
                 child = self.best(offspring, ind) #???
-                if child.fitness >= ind.fitness:
+                if child.fitness > ind.fitness:
                     rates[oper] = (1.0 + delta)*rates[oper]
                 else:
                     rates[oper] = (1.0 - delta)*rates[oper]
