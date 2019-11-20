@@ -141,3 +141,40 @@ class SimulatedAnnealing:
             P = sorted(P_next, key=lambda ind: -ind.fitness)[:self.lambda_]
             t = t+1
             self.state.append( max(P, key=lambda ind: ind.fitness).fitness )
+
+class HillClimbing(SimulatedAnnealing):
+    def __init__(self, lambda_, gen_size, data):
+        super().__init__(lambda_, False, gen_size, data)
+
+
+class SelfAdaptation:
+    def __init__(self):
+        self.n = np.random.randint(100)
+        self.lambda_ = np.random.radint(5*n, 1000)
+        self.mu = int(lambda_ / 4)
+        self.tau = 1/np.sqrt( n )
+        self.tau_i = 1/(np.sqrt(n)**0.25)
+
+
+    def terminationCondition(self):
+        pass
+
+    def sel_mu_best(self):
+        pass
+
+    def eval(self):
+        # vec_x = 
+        # vec_sigma = 
+
+        while not self.terminationCondition():
+            for k in range(1, self.lambda_ + 1):
+                xi_k = self.tau * np.random.normal(0, 1)
+                vec_xi_k = self.tau_i * np.random.normal(0, 1, size=#gen_size#)
+                vec_z_k = np.random.normal(0, 1, size=)
+
+                vec_sigma_k = vec_sigma( np.exp(vec_xi_k) 'x' np.exp(xi_k)   )
+                vec_x_k = vec_x + vec_sigma_k 'o' vec_z_k
+            P = self.sel_mu_best()
+
+            vec_sigma = (1./mu)* sum()
+            vec_x = (1./mu) * sum()
