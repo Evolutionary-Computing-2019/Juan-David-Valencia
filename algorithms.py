@@ -146,6 +146,7 @@ class HillClimbing(SimulatedAnnealing):
     def __init__(self, lambda_, gen_size, data):
         super().__init__(lambda_, False, gen_size, data)
 
+"""
 
 class SelfAdaptation:
     def __init__(self):
@@ -178,3 +179,5 @@ class SelfAdaptation:
 
             vec_sigma = (1./mu)* sum()
             vec_x = (1./mu) * sum()
+
+"""
