@@ -146,38 +146,84 @@ class HillClimbing(SimulatedAnnealing):
     def __init__(self, lambda_, gen_size, data):
         super().__init__(lambda_, False, gen_size, data)
 
-"""
 
 class SelfAdaptation:
-    def __init__(self):
+    def __init__(self, lambda_, gen_size, data):
         self.n = np.random.randint(100)
-        self.lambda_ = np.random.radint(5*n, 1000)
-        self.mu = int(lambda_ / 4)
-        self.tau = 1/np.sqrt( n )
-        self.tau_i = 1/(np.sqrt(n)**0.25)
+        self.lambda_ = lambda_
+        self.mu = int(np.ceil(lambda_ / 4))
+        self.tau = 1/np.sqrt( self.n )
+        self.tau_i = 1/(np.sqrt(self.n)**0.25)
+        self.f = Sharpe(data, 1.0)
+        self.gen_size = gen_size
+
+        self.state = []
+
+    def terminationCondition(self, t):
+        return t > 200
+
+    def sel_mu_best(self, P):
+        P.sort(key=lambda k: k.fitness, reverse=True)
+        return P[:self.mu]
+
+    def eval(self):
+        vec_x = np.random.normal(0, 1, self.gen_size)
+        vec_x = vec_x / sum(vec_x)
+        vec_sigma = np.random.normal(0, 1, self.gen_size)
+        t = 0
+        while not self.terminationCondition(t):
+            lambda_elements = []
+            for _ in range(self.lambda_):
+                xi_k = self.tau * np.random.normal(0, 1)
+                vec_xi_k = self.tau_i * np.random.normal(0, 1, size=self.gen_size)
+                vec_z_k = np.random.normal(0, 1, size=self.gen_size)
+
+                vec_sigma_k = np.multiply( vec_sigma, np.exp(vec_xi_k) ) * np.exp(xi_k) 
+                vec_x_k = vec_x + np.multiply(vec_sigma_k , vec_z_k)
+                vec_x_k = vec_x_k / sum(vec_x_k)
+                lambda_elements.append( Individual( genome=vec_x_k, sigma=vec_sigma_k, fitness=self.f.calculate(vec_x_k) ) )
+
+            P = self.sel_mu_best(lambda_elements)
+
+            vec_sigma = (1./self.mu)* sum(map(lambda ind: ind.sigma, P))
+            vec_x = (1./self.mu) * sum(map(lambda ind: ind.genome, P))
+            vec_x = vec_x / sum(vec_x)
+            t += 1
+            self.state.append( max(P, key=lambda ind: ind.fitness).fitness )
 
 
-    def terminationCondition(self):
+"""
+
+class ExponentialNES:
+    def __init__(self):
         pass
 
-    def sel_mu_best(self):
+    def terminationCondition(self, t):
         pass
 
     def eval(self):
-        # vec_x = 
-        # vec_sigma = 
+        C_12 = np.identity(self.gen_size)
+        sigma = np.random.normal(0, 1)
+        x = np.random.normal(0, 1, self.gen_size)
 
-        while not self.terminationCondition():
-            for k in range(1, self.lambda_ + 1):
-                xi_k = self.tau * np.random.normal(0, 1)
-                vec_xi_k = self.tau_i * np.random.normal(0, 1, size=#gen_size#)
-                vec_z_k = np.random.normal(0, 1, size=)
+        t = 0
+        while not self.terminationCondition(t):
+            P = []
+            for _ in range(self.lambda_):
+                z_k = np.random.normal(0, 1, self.gen_size)
+                x_k = x  + sigma * np.dot( C_12, z_k )
+                P.append( Individual(genome=x_k, z=z_k, fitness= self.f.calculate(x_k)) )
+            
+            # Recalculate x
 
-                vec_sigma_k = vec_sigma( np.exp(vec_xi_k) 'x' np.exp(xi_k)   )
-                vec_x_k = vec_x + vec_sigma_k 'o' vec_z_k
-            P = self.sel_mu_best()
+            # Recalculate sigma
+
+            # Recalculate matrix
+
 
             vec_sigma = (1./mu)* sum()
             vec_x = (1./mu) * sum()
+            t += 1
 
 """
+            
