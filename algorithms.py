@@ -3,6 +3,9 @@ from individual import Individual
 from selection import tournament
 from operators import FloatMutation, Crossover
 from function import Markowitz, Sharpe
+from functools import reduce
+from operator import add
+from scipy.linalg import expm
 
 
 """
@@ -192,38 +195,38 @@ class SelfAdaptation:
             self.state.append( max(P, key=lambda ind: ind.fitness).fitness )
 
 
-"""
+class Derandomize:
+    def __init__(self, lambda_, gen_size, data):
+        self.lambda_ = lambda_
+        self.gen_size = gen_size
 
-class ExponentialNES:
-    def __init__(self):
-        pass
+        self.tau = 1/3
+        self.d = np.sqrt(gen_size)
+        self.d_i = gen_size
+        self.f = Sharpe(data, 1.0)
+        self.state = []
 
     def terminationCondition(self, t):
-        pass
+        return t > 200
+
+    def selectBest(self, P):
+        return max(P, key=lambda k: k.fitness )
 
     def eval(self):
-        C_12 = np.identity(self.gen_size)
-        sigma = np.random.normal(0, 1)
-        x = np.random.normal(0, 1, self.gen_size)
-
         t = 0
+        vec_x = np.random.normal(0, 1, self.gen_size)
+        vec_sigma = np.random.random(self.gen_size)  
+        P = []
         while not self.terminationCondition(t):
-            P = []
             for _ in range(self.lambda_):
-                z_k = np.random.normal(0, 1, self.gen_size)
-                x_k = x  + sigma * np.dot( C_12, z_k )
-                P.append( Individual(genome=x_k, z=z_k, fitness= self.f.calculate(x_k)) )
-            
-            # Recalculate x
+                xi_k = self.tau * np.random.normal(0,1)
+                vec_z_k = np.random.normal(0, 1, self.gen_size)
+                vec_x_k = np.multiply(vec_x + np.exp(xi_k), np.multiply( vec_sigma, vec_z_k ) )
+                vec_sigma_k = np.multiply(vec_sigma,  np.exp( (1/self.d_i) * (abs(vec_z_k)/np.average(abs(np.random.normal(0, 1, 100))) - np.ones(self.gen_size)) ) ) * np.exp((1/self.d) * xi_k)
+                P.append(Individual(genome=vec_x_k, sigma=vec_sigma_k, fitness=self.f.calculate(vec_x_k)))
 
-            # Recalculate sigma
-
-            # Recalculate matrix
-
-
-            vec_sigma = (1./mu)* sum()
-            vec_x = (1./mu) * sum()
+            best = self.selectBest(P)
+            self.state.append(best.fitness)
+            vec_x = best.genome
+            vec_sigma = best.sigma
             t += 1
-
-"""
-            
