@@ -2,10 +2,12 @@ import numpy as np
 from individual import Individual
 from selection import tournament
 from operators import FloatMutation, Crossover
-from function import Markowitz, Sharpe
+from function import Markowitz, Sharpe, SharpeV2
 from functools import reduce
 from operator import add
 from scipy.linalg import expm
+from sortNondominated import sortNondominated as fast_non_dominated_sort
+from CrowdingDistance import CrowdingDist as crowfonding_distance_assignment
 
 
 """
@@ -230,3 +232,59 @@ class Derandomize:
             vec_x = best.genome
             vec_sigma = best.sigma
             t += 1
+
+
+
+class NSGAII:
+    def __init__(self, N, gen_size, data):
+        self.N = N
+        self.gen_size = gen_size
+        self.f = SharpeV2(data, 1.0)
+        self.f2 = Sharpe(data, 1.0)
+
+        self.state = []
+
+    def terminationCondition(self, t):
+        return t > 400
+
+    def initialize_population(self):
+        genomes = [ np.random.normal(0, 1, self.gen_size) for _ in range(self.N) ]
+        P = []
+        for g in genomes:
+            f1, f2 = self.f.calculate(g)
+            P.append( Individual( genome=g, f1=f1, f2=f2 ) )
+        return P
+
+    def make_new_pop(self, P):
+        # Mutations
+        Q = []
+        for ind in P:
+            new_ind = FloatMutation.eval(ind, 0.8)[0]
+            f1, f2 = self.f.calculate(new_ind.genome)
+            new_ind.f1, new_ind.f2= f1, f2
+            Q.append(new_ind)
+        return Q
+
+    def eval(self):
+        t = 0
+        P = self.initialize_population()
+        Q = []
+        while not self.terminationCondition(t):
+            R = P + Q
+            F = fast_non_dominated_sort(list(map(lambda ind: (ind.f1, ind.f2), R)))
+            F_i = [ list(map(lambda i: R[i], eF)) for eF in F  ]
+            P_next = []
+            i = 0
+            while len(P_next) + len(F[i]) < self.N:
+                # crowfonding_distance_assignment(F_i[i])
+                P_next = P_next +  F_i[i]
+                i += 1
+            # Sort i don't know
+            P_next = P_next  + F_i[i][:self.N - len(P_next)]
+            Q_next = self.make_new_pop(P_next)
+            t += 1
+            P = P_next
+            Q = Q_next
+            # Take the average of the population
+            #self.state.append(sum(map(lambda ind: self.f2.calculate(ind.genome), P))/len(P))
+            self.state.append( self.f2.calculate(P[0].genome) )

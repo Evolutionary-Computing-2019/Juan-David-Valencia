@@ -61,3 +61,26 @@ class Sharpe(Function):
 
         return sharpe - 100*contr
      
+
+class SharpeV2(Function):
+    def __init__(self, assets_data, max_weight):
+        self.data = assets_data
+        self.max_weight = max_weight
+
+    def calculate(self, representation):
+        weights = np.asmatrix(representation).T
+
+        returns = np.asmatrix(np.diff(self.data.as_matrix(), axis=0)/self.data.as_matrix()[:-1])
+        returns = returns.T
+
+        P = np.asmatrix(np.mean(returns, axis=1))
+        ER = np.dot(P.T, weights)
+        sharpe = ER[0, 0]/np.mean(np.std(P))
+        # Constraints
+        contr = (sum(representation) - 1)**2
+
+        for g in representation:
+            contr += max(0, g - 1)**2
+            contr += max(0, -g)**2
+
+        return sharpe, 100*contr
