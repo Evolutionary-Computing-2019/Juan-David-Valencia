@@ -5,7 +5,7 @@ from operators import FloatMutation, Crossover
 from function import Markowitz, Sharpe, SharpeV2
 from functools import reduce
 from operator import add
-from scipy.linalg import expm
+from collections import defaultdict
 from sortNondominated import sortNondominated as fast_non_dominated_sort
 from CrowdingDistance import CrowdingDist as crowfonding_distance_assignment
 
@@ -244,24 +244,93 @@ class NSGAII:
 
         self.state = []
 
+    def dominates(self, x_1, x_2):
+        """ This function returns True, if x_1 dominates x_2. False otherwise.
+        x_1: List of fitnesses
+        x_2: List of fitnesses
+        >>> dominates([0.5, 0.0], [1.0, 0.0])
+        True
+        >>> dominates([2.0, 3.0], [2.0, 2.0])
+        False
+        """
+        # x_1 is worst than x_2
+        for i, f in enumerate(x_1):
+            if f > x_2[i]: return False
+        for i, f in enumerate(x_1):
+            if f < x_2[i]: return True
+        return False
+
+    def crowding_distance_assignment(self, F):
+        """
+        This function assigns a distance on the solutions of a specific 
+        front.
+
+        Recieves a list of individuals
+        """
+        length = len(F)
+        F_dist = {}
+        for i, ind in enumerate(F):
+            F_dist[i] = 0
+        for m, _ in enumerate(range(3)):
+            F.sort(key=lambda ind: ind.fitness[m])
+            F_dist[0] = F_dist[length - 1] = float('inf')
+            for i in range(1, length - 1):
+                F_dist[i] = F_dist[i] + (F[i + 1].fitness[m] - F[i - 1].fitness[m])
+        Distances = {}
+        for i, ind in enumerate(F):
+            Distances[ind] = F_dist[i]
+        return Distances
+
+    def fast_nondominated_sort(self, P):
+        """
+        This algorithm finds the Paretto frontiers
+        P is a list of individuals [Individual(), Individual()] with a 
+        parameter call fitness with a list of values.
+        """
+        F = defaultdict(set) 
+        S = defaultdict(set)
+        n = defaultdict(int)
+        for p in P:
+            for q in P:
+                if self.dominates(p.fitness, q.fitness):
+                    S[p] = S[p].union({q})
+                elif self.dominates(q.fitness, p.fitness):
+                    n[p] += 1
+            if n[p] == 0:
+                F[0] = F[0].union({p})
+        i = 0
+        while F[i]:
+            H = set()
+            for p in F[i]:
+                for q in S[p]:
+                    n[q] = n[q] - 1
+                    if n[q] == 0:
+                        H = H.union({q})
+            i += 1
+            F[i] = H
+        F.pop(i)
+        return F
+
     def terminationCondition(self, t):
-        return t > 400
+        return t > 200
 
     def initialize_population(self):
-        genomes = [ np.random.normal(0, 1, self.gen_size) for _ in range(self.N) ]
+        genomes = [ np.random.normal(0.0, 100.0, self.gen_size) for _ in range(self.N) ]
+        for ind, g in enumerate(genomes):
+            genomes[ind] = g/sum(g)
+            genomes[ind] = np.max(np.vstack((genomes[ind], np.zeros(self.gen_size))), axis=0)
         P = []
         for g in genomes:
-            f1, f2 = self.f.calculate(g)
-            P.append( Individual( genome=g, f1=f1, f2=f2 ) )
+            f1, f2, f3 = self.f.calculate(g)
+            P.append( Individual( genome=g, fitness=(f1, f2, f3) ) )
         return P
 
     def make_new_pop(self, P):
         # Mutations
         Q = []
         for ind in P:
-            new_ind = FloatMutation.eval(ind, 0.8)[0]
-            f1, f2 = self.f.calculate(new_ind.genome)
-            new_ind.f1, new_ind.f2= f1, f2
+            new_ind = FloatMutation.eval(ind, 1)[0]
+            new_ind.fitness = self.f.calculate(new_ind.genome)  
             Q.append(new_ind)
         return Q
 
@@ -269,22 +338,27 @@ class NSGAII:
         t = 0
         P = self.initialize_population()
         Q = []
+        
         while not self.terminationCondition(t):
             R = P + Q
-            F = fast_non_dominated_sort(list(map(lambda ind: (ind.f1, ind.f2), R)))
-            F_i = [ list(map(lambda i: R[i], eF)) for eF in F  ]
+            F = self.fast_nondominated_sort(R)
             P_next = []
             i = 0
-            while len(P_next) + len(F[i]) < self.N:
-                # crowfonding_distance_assignment(F_i[i])
-                P_next = P_next +  F_i[i]
+            Distances = {}
+            while len(P_next) < self.N:
+                dist_current = self.crowding_distance_assignment(list(F[i]))
+                for k in dist_current:
+                    Distances[k] = dist_current[k]
+                for individual in sorted(F[i], key=lambda ind: Distances[ind], reverse=True):
+                    if len(P_next) < self.N:
+                        P_next.append(individual)
                 i += 1
-            # Sort i don't know
-            P_next = P_next  + F_i[i][:self.N - len(P_next)]
+            #P_next.sort(key=lambda ind: Distances[ind], reverse=True)
             Q_next = self.make_new_pop(P_next)
             t += 1
             P = P_next
             Q = Q_next
             # Take the average of the population
-            #self.state.append(sum(map(lambda ind: self.f2.calculate(ind.genome), P))/len(P))
-            self.state.append( self.f2.calculate(P[0].genome) )
+            print(P[0].fitness)
+            value = [ self.f2.calculate(ind.genome) for ind in P ]
+            self.state.append( max(value) )

@@ -75,7 +75,7 @@ class SharpeV2(Function):
 
         P = np.asmatrix(np.mean(returns, axis=1))
         ER = np.dot(P.T, weights)
-        sharpe = ER[0, 0]/np.mean(np.std(P))
+        # sharpe = ER[0, 0]/np.mean(np.std(P))
         # Constraints
         contr = (sum(representation) - 1)**2
 
@@ -83,4 +83,4 @@ class SharpeV2(Function):
             contr += max(0, g - 1)**2
             contr += max(0, -g)**2
 
-        return sharpe, 100*contr
+        return -ER[0, 0], np.mean(np.std(P)), contr

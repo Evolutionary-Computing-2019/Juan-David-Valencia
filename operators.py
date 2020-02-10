@@ -21,8 +21,7 @@ class FloatMutation(Operator):
         if np.random.uniform() < p:
             for n in range(len(c_ind.genome)):
                 c_ind.genome[n] += np.random.normal(0, 0.01)
-                if c_ind.genome[n] < 0.0:
-                    c_ind.genome[n] = 0.0
+                c_ind.genome[n] = max(0.0, c_ind.genome[n])
 
         c_ind.genome = c_ind.genome/sum(c_ind.genome)
         return [c_ind]

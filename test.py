@@ -10,14 +10,14 @@ end = datetime.now()
 
 data = pd.read_csv('data.csv', index_col='Date')
 
-"""
+
 h = HAEA(100, data.shape[1], data)
 h.eval()
-plt.subplot(221)
+plt.subplot(211)
 plt.plot(h.state[:200])
 
 
-
+"""
 sa = SimulatedAnnealing(100, True, data.shape[1], data)
 sa.eval()
 plt.subplot(222)
@@ -44,7 +44,7 @@ plt.plot(sa.state[:200])
 """
 ngsa2 = NSGAII(100, data.shape[1], data)
 ngsa2.eval()
-#plt.subplot(224)
+plt.subplot(212)
 plt.plot(ngsa2.state[:200])
 
 
