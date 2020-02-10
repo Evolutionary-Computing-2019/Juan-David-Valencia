@@ -32,7 +32,7 @@ class Crossover(Operator):
     @classmethod
     def eval(cls, ind, other, p):
 
-        if 'rates' in ind.__dict__:
+        if not 'rates' in ind.__dict__:
             ind.rates = np.ones(1)
 
         genome_1, genome_2 = [], []

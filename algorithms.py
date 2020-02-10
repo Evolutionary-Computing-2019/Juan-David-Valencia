@@ -1,3 +1,4 @@
+import random
 import numpy as np
 from individual import Individual
 from selection import tournament
@@ -328,10 +329,16 @@ class NSGAII:
     def make_new_pop(self, P):
         # Mutations
         Q = []
-        for ind in P:
+        for ind in random.choices(P, k=len(P)//2):
             new_ind = FloatMutation.eval(ind, 1)[0]
             new_ind.fitness = self.f.calculate(new_ind.genome)  
             Q.append(new_ind)
+
+        for ind in random.choices(P, k=len(P)//4):
+            new_ind1, new_ind2 = Crossover.eval(ind, random.choice(P), 1)
+            new_ind1.fitness = self.f.calculate(new_ind1.genome)
+            new_ind2.fitness = self.f.calculate(new_ind2.genome)
+            Q.extend([new_ind1, new_ind2])
         return Q
 
     def eval(self):
