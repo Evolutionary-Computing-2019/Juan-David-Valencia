@@ -366,6 +366,5 @@ class NSGAII:
             P = P_next
             Q = Q_next
             # Take the average of the population
-            print(P[0].fitness)
             value = [ self.f2.calculate(ind.genome) for ind in P ]
             self.state.append( max(value) )
