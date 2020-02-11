@@ -16,6 +16,7 @@ if sys.argv[1] == 'haea':
     h.eval()
     print(h.f.count)
     #plt.subplot(231)
+    plt.title('HAEA')
     plt.plot(h.state[:200])
 
 elif sys.argv[1] == 'sa':
@@ -23,6 +24,7 @@ elif sys.argv[1] == 'sa':
     sa.eval()
     print(sa.f.count)
     #plt.subplot(232)
+    plt.title('Simulated Annealing')
     plt.plot(sa.state[:200])
 
 elif sys.argv[1] == 'hill':
@@ -30,6 +32,7 @@ elif sys.argv[1] == 'hill':
     hc.eval()
     print(hc.f.count)
     #plt.subplot(233)
+    plt.title('Hill Climbing')
     plt.plot(hc.state[:200])
 
 elif sys.argv[1] == 'selfadaptation':
@@ -37,6 +40,7 @@ elif sys.argv[1] == 'selfadaptation':
     sa.eval()
     print(sa.f.count)
     #plt.subplot(234)
+    plt.title('SelfAdaptation')
     plt.plot(sa.state[:200])
 
 elif sys.argv[1] == 'derandomize':
@@ -44,12 +48,14 @@ elif sys.argv[1] == 'derandomize':
     sa.eval()
     print(sa.f.count)
     #plt.subplot(235)
+    plt.title('Derandomize')
     plt.plot(sa.state[:200])
 
 elif sys.argv[1] == 'nsga':
     ngsa2 = NSGAII(100, data.shape[1], data)
     ngsa2.eval()
     #plt.subplot(236)
+    plt.title('NSGA-II')
     plt.plot(ngsa2.state[:200])
 
 plt.show()

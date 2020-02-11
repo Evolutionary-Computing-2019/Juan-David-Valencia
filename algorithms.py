@@ -373,3 +373,12 @@ class NSGAII:
             # Take the average of the population
             value = [ self.f2.calculate(ind.genome) for ind in P ]
             self.state.append( max(value) )
+
+
+class Coevolution:
+    def __init__(self, subspecies_number, data, algorithm):
+        
+        pass
+
+    def eval(self):
+        pass

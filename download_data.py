@@ -7,8 +7,10 @@ end = datetime.now()
 
 symbols_list = ['ORCL', 'TSLA', 'IBM','YELP', 'MSFT']
 with open('sp500list', 'r') as fi:
-    symbols_list = fi.read().split()[:40]
+    symbols_list = list(set(fi.read().split()))
+    
 
+print(symbols_list)
 data = {}
 for symbol in symbols_list:
     data[symbol] = web.DataReader(symbol, 'yahoo', start, end)['Close']
