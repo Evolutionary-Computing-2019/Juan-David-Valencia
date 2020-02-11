@@ -7,8 +7,6 @@ from function import Markowitz, Sharpe, SharpeV2
 from functools import reduce
 from operator import add
 from collections import defaultdict
-from sortNondominated import sortNondominated as fast_non_dominated_sort
-from CrowdingDistance import CrowdingDist as crowfonding_distance_assignment
 
 
 """
@@ -33,6 +31,7 @@ class HAEA:
             rates = np.ones(len(self.operators))
             rates = rates / sum(rates) # Uniform probability
             fitness = self.f.calculate(genome)
+            self.f.count += 1
             individual = Individual(genome=genome, fitness=fitness, rates=rates)
             population.append(individual)
         return population
@@ -72,6 +71,7 @@ class HAEA:
                 # Calculate the fitness
                 for off in offspring:
                     off.fitness = self.f.calculate(off.genome)
+                    self.f.count += 1
 
                 child = self.best(offspring, ind) #???
                 if child.fitness > ind.fitness:
@@ -107,6 +107,7 @@ class SimulatedAnnealing:
             genome = genome/sum(genome)
 
             fitness = self.f.calculate(genome)
+            self.f.count += 1
             individual = Individual(genome=genome, fitness=fitness)
             population.append(individual)
 
@@ -132,6 +133,7 @@ class SimulatedAnnealing:
         new_genome = np.abs(new_genome)/sum(new_genome)
         new_ind = Individual(genome=new_genome, fitness=np.nan)
         new_ind.fitness = self.f.calculate(new_ind.genome)
+        self.f.count += 1
         return new_ind
 
     def eval(self):
@@ -173,7 +175,7 @@ class SelfAdaptation:
         return P[:self.mu]
 
     def eval(self):
-        vec_x = np.random.normal(0, 1, self.gen_size)
+        vec_x = np.random.uniform(0.0, 100.0, self.gen_size)
         vec_x = vec_x / sum(vec_x)
         vec_sigma = np.random.normal(0, 1, self.gen_size)
         t = 0
@@ -188,6 +190,7 @@ class SelfAdaptation:
                 vec_x_k = vec_x + np.multiply(vec_sigma_k , vec_z_k)
                 vec_x_k = vec_x_k / sum(vec_x_k)
                 lambda_elements.append( Individual( genome=vec_x_k, sigma=vec_sigma_k, fitness=self.f.calculate(vec_x_k) ) )
+                self.f.count += 1
 
             P = self.sel_mu_best(lambda_elements)
 
@@ -217,7 +220,8 @@ class Derandomize:
 
     def eval(self):
         t = 0
-        vec_x = np.random.normal(0, 1, self.gen_size)
+        vec_x = np.random.uniform(0.0, 1, self.gen_size)
+        vec_x = vec_x / sum(vec_x)
         vec_sigma = np.random.random(self.gen_size)  
         P = []
         while not self.terminationCondition(t):
@@ -227,6 +231,7 @@ class Derandomize:
                 vec_x_k = np.multiply(vec_x + np.exp(xi_k), np.multiply( vec_sigma, vec_z_k ) )
                 vec_sigma_k = np.multiply(vec_sigma,  np.exp( (1/self.d_i) * (abs(vec_z_k)/np.average(abs(np.random.normal(0, 1, 100))) - np.ones(self.gen_size)) ) ) * np.exp((1/self.d) * xi_k)
                 P.append(Individual(genome=vec_x_k, sigma=vec_sigma_k, fitness=self.f.calculate(vec_x_k)))
+                self.f.count += 1
 
             best = self.selectBest(P)
             self.state.append(best.fitness)

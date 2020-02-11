@@ -42,6 +42,7 @@ class Sharpe(Function):
     def __init__(self, assets_data, max_weight):
        self.data = assets_data
        self.max_weight = max_weight
+       self.count = 0
 
     def calculate(self, representation):
         weights = np.asmatrix(representation).T
