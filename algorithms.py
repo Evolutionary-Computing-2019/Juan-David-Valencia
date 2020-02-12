@@ -90,7 +90,6 @@ class HAEA:
             
             self.state.append( max(P, key=lambda ind: ind.fitness).fitness )
             t = t+1
-        print(len(P[0].genome))
         return (max(P, key=lambda ind: ind.fitness)).genome
 
 
@@ -412,5 +411,4 @@ class Coevolution:
                 solution[ original_indices[security] ] = solution_by_species[ind][ind_s]
 
         solution = solution/sum(solution)
-        print(solution, sum(solution))
         return self.f.calculate(solution)

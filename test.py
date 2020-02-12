@@ -14,10 +14,10 @@ data = pd.read_csv('data.csv', index_col='Date')
 if sys.argv[1] == 'haea':
     h = HAEA(66, data.shape[1], data)
     h.eval()
-    print(h.f.count)
     #plt.subplot(231)
     plt.title('HAEA')
-    plt.plot(h.state[:200])
+    #plt.plot(h.state[:200])
+    print(" ".join(map(str, h.state[:200])))
 
 elif sys.argv[1] == 'sa':
     sa = SimulatedAnnealing(100, True, data.shape[1], data)
@@ -64,5 +64,5 @@ elif sys.argv[1] == 'coevol':
     print("Coevolution:", sol_eval)
 
 
-plt.show()
+#plt.show()
 
