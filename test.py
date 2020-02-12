@@ -3,7 +3,7 @@ import pandas as pd
 import pandas_datareader.data as web
 import matplotlib.pyplot as plt
 from datetime import datetime
-from algorithms import HAEA, SimulatedAnnealing, HillClimbing, SelfAdaptation, Derandomize, NSGAII
+from algorithms import HAEA, SimulatedAnnealing, HillClimbing, SelfAdaptation, Derandomize, NSGAII, Coevolution
 
 
 start = datetime(2015, 1, 1)
@@ -57,6 +57,12 @@ elif sys.argv[1] == 'nsga':
     #plt.subplot(236)
     plt.title('NSGA-II')
     plt.plot(ngsa2.state[:200])
+
+elif sys.argv[1] == 'coevol':
+    coevolution = Coevolution(10, data, HAEA)
+    sol_eval = coevolution.eval()
+    print("Coevolution:", sol_eval)
+
 
 plt.show()
 

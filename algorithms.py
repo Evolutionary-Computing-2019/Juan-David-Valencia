@@ -90,6 +90,8 @@ class HAEA:
             
             self.state.append( max(P, key=lambda ind: ind.fitness).fitness )
             t = t+1
+        print(len(P[0].genome))
+        return (max(P, key=lambda ind: ind.fitness)).genome
 
 
 class SimulatedAnnealing:
@@ -350,7 +352,7 @@ class NSGAII:
         t = 0
         P = self.initialize_population()
         Q = []
-        
+        val = 0
         while not self.terminationCondition(t):
             R = P + Q
             F = self.fast_nondominated_sort(R)
@@ -372,13 +374,43 @@ class NSGAII:
             Q = Q_next
             # Take the average of the population
             value = [ self.f2.calculate(ind.genome) for ind in P ]
+            if self.terminationCondition(t): val = value
             self.state.append( max(value) )
+        return val
 
 
 class Coevolution:
     def __init__(self, subspecies_number, data, algorithm):
+        self.subspecies_number = subspecies_number
+        self.data = data
+        self.algorithm = algorithm
+        self.f = Sharpe(data, 1.0)
+
         
-        pass
 
     def eval(self):
-        pass
+        data_indices = []
+        original_indices = {}
+        for r in range(self.subspecies_number):
+            columns = []
+            for i in range(len(self.data.columns)):
+                if i % self.subspecies_number == r:
+                    columns.append(self.data.columns[i])
+                    original_indices[self.data.columns[i]] = i
+            data_indices.append(columns)
+        # data_indices -> [[], [], ....]  of securities
+        # original_indices -> Security to index
+
+        solution_by_species = []
+        for i in range(self.subspecies_number):
+            algorithm_run = self.algorithm(100, len(data_indices[i]), self.data[data_indices[i]])
+            solution_by_species.append(algorithm_run.eval())
+
+        solution = np.zeros(self.data.shape[1])
+        for ind, list_of_securities in enumerate(data_indices):
+            for ind_s, security in enumerate(list_of_securities):
+                solution[ original_indices[security] ] = solution_by_species[ind][ind_s]
+
+        solution = solution/sum(solution)
+        print(solution, sum(solution))
+        return self.f.calculate(solution)
