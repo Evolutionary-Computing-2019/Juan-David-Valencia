@@ -411,4 +411,5 @@ class Coevolution:
                 solution[ original_indices[security] ] = solution_by_species[ind][ind_s]
 
         solution = solution/sum(solution)
+        print(solution)
         return self.f.calculate(solution)

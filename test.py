@@ -22,26 +22,29 @@ if sys.argv[1] == 'haea':
 elif sys.argv[1] == 'sa':
     sa = SimulatedAnnealing(100, True, data.shape[1], data)
     sa.eval()
-    print(sa.f.count)
+    #print(sa.f.count)
     #plt.subplot(232)
     plt.title('Simulated Annealing')
-    plt.plot(sa.state[:200])
+    #plt.plot(sa.state[:200])
+    print(" ".join(map(str, sa.state[:200])))
 
 elif sys.argv[1] == 'hill':
     hc = HillClimbing(100, data.shape[1], data)
     hc.eval()
-    print(hc.f.count)
+    #print(hc.f.count)
     #plt.subplot(233)
     plt.title('Hill Climbing')
-    plt.plot(hc.state[:200])
+    #plt.plot(hc.state[:200])
+    print(" ".join(map(str, hc.state[:200])))
 
 elif sys.argv[1] == 'selfadaptation':
     sa = SelfAdaptation(100, data.shape[1], data)
     sa.eval()
-    print(sa.f.count)
+    #print(sa.f.count)
     #plt.subplot(234)
     plt.title('SelfAdaptation')
-    plt.plot(sa.state[:200])
+    #plt.plot(sa.state[:200])
+    print(" ".join(map(str, sa.state[:200])))
 
 elif sys.argv[1] == 'derandomize':
     sa = Derandomize(100, data.shape[1], data)
