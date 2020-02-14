@@ -19,6 +19,11 @@ titles = {
 for alg in algorithms:
     list_data.append((alg, read_data(alg)))
 
+"""
+for name, data in list_data:
+    print(name,data.median()[data.shape[1] - 1],  data.mean()[data.shape[1] - 1], data.std()[data.shape[1] - 1])
+
+"""
 for name, data in list_data:
     fig = plt.figure()
     ax = plt.subplot(111)

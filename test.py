@@ -1,5 +1,6 @@
 import sys
 import pandas as pd
+import numpy as np
 import pandas_datareader.data as web
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -56,10 +57,20 @@ elif sys.argv[1] == 'derandomize':
 
 elif sys.argv[1] == 'nsga':
     ngsa2 = NSGAII(100, data.shape[1], data)
-    ngsa2.eval()
+    Fronts = ngsa2.eval()
     #plt.subplot(236)
+    ax = plt.subplot(111)
+    #Fronts = list(map(lambda front: list(map(lambda ind: ind.fitness[:2], Fronts[front])), Fronts))
     plt.title('NSGA-II')
-    plt.plot(ngsa2.state[:200])
+    for num in Fronts:
+        points = list(map(lambda ind: ind.fitness[:2], Fronts[num]))
+        x, y = zip(*points)
+        x = -1*np.array(x)
+        ax.scatter(x, y, label="Front {}".format(num + 1))
+    plt.xlabel('Expected Return')
+    plt.ylabel('Risk (Variance)')
+    ax.legend()
+    plt.show()
 
 elif sys.argv[1] == 'coevol':
     coevolution = Coevolution(10, data, HAEA)

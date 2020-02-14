@@ -351,7 +351,6 @@ class NSGAII:
         t = 0
         P = self.initialize_population()
         Q = []
-        val = 0
         while not self.terminationCondition(t):
             R = P + Q
             F = self.fast_nondominated_sort(R)
@@ -373,9 +372,8 @@ class NSGAII:
             Q = Q_next
             # Take the average of the population
             value = [ self.f2.calculate(ind.genome) for ind in P ]
-            if self.terminationCondition(t): val = value
             self.state.append( max(value) )
-        return val
+        return self.fast_nondominated_sort(P+Q)
 
 
 class Coevolution:
